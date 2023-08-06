@@ -1,0 +1,21 @@
+services:
+  postgresdb: # https://hub.docker.com /_/postgres/
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: "dfghcjkjh978687"
+      POSTGRES_USER: dbuser
+      POSTGRES_DB: appdb
+    volumes:
+      - ../pgroot/msgapp/postgres:/var/lib/postgresql/data
+    ports:
+      - "52886:5432"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "dbuser", "-d", "appdb"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
