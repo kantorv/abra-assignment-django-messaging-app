@@ -1,1 +1,17 @@
+# MAIN
 Django>4.2
+psycopg[binary,pool] # will be relevant after 4.2 release
+
+# REST API
+djangorestframework
+djangorestframework-jwt
+
+
+
+# DEVELOPMENT
+django-cors-headers
+pytest
+sentry_sdk
+pytest-asyncio
+pytest-django
+whitenoise
