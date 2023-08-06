@@ -4,8 +4,7 @@ psycopg[binary,pool] # will be relevant after 4.2 release
 
 # REST API
 djangorestframework
-djangorestframework-jwt
-
+djangorestframework-simplejwt
 
 
 # DEVELOPMENT
