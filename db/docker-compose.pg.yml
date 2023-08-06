@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: dbuser
       POSTGRES_DB: appdb
     volumes:
-      - ../pgroot/msgapp/postgres:/var/lib/postgresql/data
+      - ../../pgroot/msgapp/postgres:/var/lib/postgresql/data
     ports:
       - "52886:5432"
     logging:
