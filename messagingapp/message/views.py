@@ -43,7 +43,18 @@ class MessageViewSet(viewsets.ModelViewSet):
         subject = payload.get('subject')
         message = payload.get('message')
 
-        receiver = User.objects.get(username=receiver_username)
+        try:
+            receiver = User.objects.get(username=receiver_username)
+        except User.DoesNotExist:
+            response = {
+                "error" : True,
+                "code" : 1004,
+                "message" : "Recipient does not exists"
+            }
+            return Response(response, status=status.HTTP_400_BAD_REQUEST )
+
+
+
         data = dict(
             sender = sender.pk,
             receiver = receiver.pk,
