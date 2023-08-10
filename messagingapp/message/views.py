@@ -26,8 +26,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         user= self.request.user
 
         # viewing particular message is allowed (just) to sender or receiver
-        q1 = Q(sender=user)
-        q2 = Q(receiver=user)
+        q1 = Q(sender=user, hide_for_sender=False)
+        q2 = Q(receiver=user, hide_for_receiver=False)
 
         try:
             object =  Message.objects.get(q1|q2, pk=pk)
@@ -51,7 +51,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                 "code" : 1004,
                 "message" : "Recipient does not exists"
             }
-            return Response(response, status=status.HTTP_400_BAD_REQUEST )
+            return Response(response, status=status.HTTP_201_CREATED )
 
 
 
@@ -74,7 +74,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def sent(self, request, *args, **kwargs):
-        queryset = Message.objects.filter(sender=request.user)
+        queryset = Message.objects.filter(sender=request.user, hide_for_sender=False)
         #queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
@@ -87,7 +87,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def received(self, request, *args, **kwargs):
-        queryset = Message.objects.filter(receiver=request.user)
+        queryset = Message.objects.filter(receiver=request.user, hide_for_receiver=False)
         #queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
@@ -97,3 +97,38 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+    @action(detail=False, methods=["DELETE"])
+    def delete_recieved(self, request, *args, **kwargs):
+        msg_ids = request.data
+        objects = Message.objects.filter(receiver=self.request.user, hide_for_receiver=False, pk__in=msg_ids)
+        cnt = objects.count()
+
+        # TODO: handle msg_ids count not equal to fetched objects
+
+        hide_list = objects.filter(hide_for_sender=False)
+        hide_list.update(hide_for_receiver=True)
+
+        #cleanup
+        permanent_delete_list = objects.filter(hide_for_sender=True)
+        permanent_delete_list.delete()
+
+        return Response( status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["DELETE"])
+    def delete_sent(self, request, *args, **kwargs):
+        msg_ids = request.data
+        objects = Message.objects.filter(sender=self.request.user, hide_for_sender=False, pk__in=msg_ids)
+        cnt = objects.count()
+
+        hide_list = objects.filter(hide_for_receiver=False)
+        hide_list.update(hide_for_sender=True)
+
+        # cleanup
+        permanent_delete_list = objects.filter(hide_for_receiver=True)
+        permanent_delete_list.delete()
+
+
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

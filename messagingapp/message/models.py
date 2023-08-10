@@ -12,6 +12,8 @@ class Message(models.Model):
     created = models.DateTimeField(auto_now_add = True, auto_now = False, blank = True)
     sender = models.ForeignKey(User, on_delete = models.SET_NULL, blank = True, null = True, related_name="sent_messages")
     receiver = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="received_messages")
+    hide_for_sender = models.BooleanField(default=False)
+    hide_for_receiver = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
